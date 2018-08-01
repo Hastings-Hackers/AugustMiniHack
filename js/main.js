@@ -53,13 +53,16 @@ window.addEventListener( 'resize', function() {
 
 try {
 	// Create a instance of AudioContext interface
-	window.AudioContext = window.AudioContext||window.webkitAudioContext||window.mozAudioContext;
+	window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
 
 	var context = new AudioContext();
 
 	var analyser = context.createAnalyser();
 	analyser.fftSize = 2048;
+	var bufferLength = analyser.frequencyBinCount; 
+	var dataArray = new Uint8Array(bufferLength);
 
+	console.log(analyser)
 
 	var source = context.createBufferSource(); 
 
@@ -68,15 +71,24 @@ try {
 	request.responseType = 'arraybuffer';
 	request.onload = function(){
 		context.decodeAudioData(request.response, function(buffer) {
-			console.log(buffer);
 			source.buffer = buffer;
 		}, null);
 	}
 	request.send();
 
 	source.connect(context.destination);
+    source.connect(analyser);
 
 	source.start(0);
+
+	function draw() {
+	  requestAnimationFrame(draw);
+
+	  analyser.getByteTimeDomainData(dataArray);
+	  
+	}
+
+	draw();
 }
 catch(e)  {
 	alert("Web Audio API not supported");
