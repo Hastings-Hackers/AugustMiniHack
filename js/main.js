@@ -17,7 +17,7 @@ document.body.appendChild(renderer.domElement);
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
 // Set the x/y/z position of the camera
-camera.position.x = 1;
+camera.position.x = 0;
 camera.position.y = 1;
 camera.position.z = 2;
 
@@ -37,9 +37,15 @@ var radius = 1;
 
 var geometry = new THREE.SphereGeometry(radius, 100, 100 );
 var material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
-var sphere = new THREE.Mesh( geometry, material );
 
-scene.add( sphere );
+var sphere1 = new THREE.Mesh( geometry, material );
+sphere1.position.x = -1;
+
+var sphere2= new THREE.Mesh( geometry, material );
+sphere2.position.x = 1;
+
+scene.add( sphere1 );
+scene.add( sphere2 );
 
 // Creates the render function and this will call itself recursively
 var render = function () {
@@ -65,15 +71,22 @@ try {
 
 	var context = new AudioContext();
 
-	var analyser = context.createAnalyser();
-	analyser.fftSize = 2048;
-	var bufferLength = analyser.frequencyBinCount; 
-	var dataArray = new Uint8Array(bufferLength);
+	var splitter = context.createChannelSplitter(2);
+
+	var analyser1 = context.createAnalyser();
+	analyser1.fftSize = 2048;
+	var bufferLength1 = analyser1.frequencyBinCount; 
+	var dataArray1 = new Uint8Array(bufferLength1);
+
+	var analyser2 = context.createAnalyser();
+	analyser2.fftSize = 2048;
+	var bufferLength2 = analyser2.frequencyBinCount; 
+	var dataArray2 = new Uint8Array(bufferLength2);
 
 	var source = context.createBufferSource(); 
 
 	var request = new XMLHttpRequest();
-	request.open('GET', 'http://localhost:8080/music/test.mp3', true);
+	request.open('GET', 'http://localhost:8080/music/test2.mp3', true);
 	request.responseType = 'arraybuffer';
 	request.onload = function(){
 		context.decodeAudioData(request.response, function(buffer) {
@@ -83,7 +96,10 @@ try {
 	request.send();
 
 	source.connect(context.destination);
-    source.connect(analyser);
+    source.connect(splitter);
+
+	splitter.connect(analyser1,0,0);
+	splitter.connect(analyser2,1,0);
 
 	source.start(0);
 
@@ -91,19 +107,34 @@ try {
 		requestAnimationFrame(draw);
 
 		//analyser.getByteTimeDomainData(dataArray);
-		analyser.getByteFrequencyData(dataArray);
+		analyser1.getByteFrequencyData(dataArray1);
 
-		var count = 0;
+		var count1 = 0;
 
-		for (var i=0; i<dataArray.length; i++) count += dataArray[i];
+		for (var i=0; i<dataArray1.length; i++) count1 += dataArray1[i];
 	
-		var avg = (count/dataArray.length)/100;
+		var avg1 = (count1/dataArray1.length)/100;
 
-		var scale = radius * avg;
+		var scale1 = radius * avg1;
 
-		sphere.scale.x = scale;
-		sphere.scale.y = scale;
-		sphere.scale.z = scale;
+		sphere1.scale.x = scale1;
+		sphere1.scale.y = scale1;
+		sphere1.scale.z = scale1;
+
+		//analyser.getByteTimeDomainData(dataArray);
+		analyser2.getByteFrequencyData(dataArray2);
+
+		var count2 = 0;
+
+		for (var i=0; i<dataArray2.length; i++) count2 += dataArray2[i];
+	
+		var avg2 = (count2/dataArray2.length)/100;
+
+		var scale2 = radius * avg2;
+
+		sphere2.scale.x = scale2;
+		sphere2.scale.y = scale2;
+		sphere2.scale.z = scale2;
 	}
 
 	draw();
