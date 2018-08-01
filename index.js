@@ -9,6 +9,10 @@ app.use("/styles", express.static(__dirname + "/styles"));
 
 var http = require("http").createServer(app).listen(8080);
 
+app.get("/music/:fileName", function(req, res) {
+	res.sendFile(path.join(__dirname, "/music/" + req.params.fileName)); 
+});
+
 app.get("/", function(req, res) {
 	res.sendFile(path.join(__dirname, "/views/main.html")); 
 });
