@@ -33,6 +33,14 @@ directionalLight.position.set(0, 1, 3);
 // Add the light to the scene
 scene.add(directionalLight);
 
+var radius = 1;
+
+var geometry = new THREE.SphereGeometry(radius, 100, 100 );
+var material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
+var sphere = new THREE.Mesh( geometry, material );
+
+scene.add( sphere );
+
 // Creates the render function and this will call itself recursively
 var render = function () {
 	requestAnimationFrame( render );
@@ -62,8 +70,6 @@ try {
 	var bufferLength = analyser.frequencyBinCount; 
 	var dataArray = new Uint8Array(bufferLength);
 
-	console.log(analyser)
-
 	var source = context.createBufferSource(); 
 
 	var request = new XMLHttpRequest();
@@ -82,10 +88,22 @@ try {
 	source.start(0);
 
 	function draw() {
-	  requestAnimationFrame(draw);
+		requestAnimationFrame(draw);
 
-	  analyser.getByteTimeDomainData(dataArray);
-	  
+		//analyser.getByteTimeDomainData(dataArray);
+		analyser.getByteFrequencyData(dataArray);
+
+		var count = 0;
+
+		for (var i=0; i<dataArray.length; i++) count += dataArray[i];
+	
+		var avg = (count/dataArray.length)/100;
+
+		var scale = radius * avg;
+
+		sphere.scale.x = scale;
+		sphere.scale.y = scale;
+		sphere.scale.z = scale;
 	}
 
 	draw();
