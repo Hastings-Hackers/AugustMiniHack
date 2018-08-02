@@ -47,15 +47,6 @@ sphere2.position.x = 1;
 scene.add( sphere1 );
 scene.add( sphere2 );
 
-// Creates the render function and this will call itself recursively
-var render = function () {
-	requestAnimationFrame( render );
-	
-	renderer.render(scene, camera);
-};
-
-// Starts the rendering
-render();
 
 // Add a resize event to the window so the scene resizes if the window changs size
 window.addEventListener( 'resize', function() {
@@ -86,7 +77,7 @@ try {
 	var source = context.createBufferSource(); 
 
 	var request = new XMLHttpRequest();
-	request.open('GET', 'http://localhost:8080/music/test2.mp3', true);
+	request.open('GET', 'http://localhost:8080/music/test.mp3', true);
 	request.responseType = 'arraybuffer';
 	request.onload = function(){
 		context.decodeAudioData(request.response, function(buffer) {
@@ -135,6 +126,8 @@ try {
 		sphere2.scale.x = scale2;
 		sphere2.scale.y = scale2;
 		sphere2.scale.z = scale2;
+
+		renderer.render(scene, camera);
 	}
 
 	draw();
